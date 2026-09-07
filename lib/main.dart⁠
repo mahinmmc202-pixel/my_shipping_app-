@@ -1,0 +1,158 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const ShippingCalculatorApp());
+}
+
+class ShippingCalculatorApp extends StatelessWidget {
+  const ShippingCalculatorApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Shipping Calculator',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        useMaterial3: true,
+      ),
+      home: const CalculatorScreen(),
+    );
+  }
+}
+
+class CalculatorScreen extends StatefulWidget {
+  const CalculatorScreen({super.key});
+
+  @override
+  State<CalculatorScreen> createState() => _CalculatorScreenState();
+}
+
+class _CalculatorScreenState extends State<CalculatorScreen> {
+  final _lengthController = TextEditingController();
+  final _widthController = TextEditingController();
+  final _heightController = TextEditingController();
+  final _weightController = TextEditingController();
+
+  double _volumetricWeight = 0.0;
+  double _chargeableWeight = 0.0;
+  double _totalCost = 0.0;
+
+  void _calculate() {
+    double length = double.tryParse(_lengthController.text) ?? 0.0;
+    double width = double.tryParse(_widthController.text) ?? 0.0;
+    double height = double.tryParse(_heightController.text) ?? 0.0;
+    double actualWeight = double.tryParse(_weightController.text) ?? 0.0;
+
+    // Volumetric Weight Calculation (Standard Divider: 5000)
+    double volWeight = (length * width * height) / 5000;
+
+    // Chargeable weight is the higher one between Actual and Volumetric weight
+    double maxWeight = volWeight > actualWeight ? volWeight : actualWeight;
+
+    // Rate per kg (Example: 500 BDT)
+    double cost = maxWeight * 500;
+
+    setState(() {
+      _volumetricWeight = volWeight;
+      _chargeableWeight = maxWeight;
+      _totalCost = cost;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Shipping Cost Calculator'),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _lengthController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Length (cm)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _widthController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Width (cm)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _heightController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Height (cm)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _weightController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Actual Weight (kg)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _calculate,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.vertical(15),
+              ),
+              child: const Text(
+                'Calculate Cost',
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+            const SizedBox(height: 25),
+            Card(
+              color: Colors.blue.shade50,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      'Volumetric Weight: ${_volumetricWeight.toStringAsFixed(2)} kg',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Chargeable Weight: ${_chargeableWeight.toStringAsFixed(2)} kg',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Divider(height: 20),
+                    Text(
+                      'Total Cost: ${_totalCost.toStringAsFixed(2)} BDT',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
